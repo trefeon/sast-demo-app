@@ -9,10 +9,12 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 script {
-                    // Install Bandit in a virtual environment
+                    // Use bash to run commands that use 'source'
                     sh '''
+                    # Ensure bash is used to run the script
+                    # Create and activate a virtual environment
                     python3 -m venv venv
-                    source venv/bin/activate
+                    bash -c "source venv/bin/activate"
                     pip install bandit
                     '''
                 }
@@ -21,9 +23,9 @@ pipeline {
         stage('SAST Analysis') {
             steps {
                 script {
-                    // Run Bandit on the repository and output results in XML format
+                    // Run Bandit analysis and output results in XML format
                     sh '''
-                    source venv/bin/activate
+                    bash -c "source venv/bin/activate"
                     bandit -r . -f xml -o bandit_report.xml || true
                     '''
                 }
@@ -31,7 +33,7 @@ pipeline {
         }
         stage('Publish Bandit Results') {
             steps {
-                // Publish Bandit report as part of the build results
+                // Publish the Bandit report results to Jenkins
                 recordIssues(tools: [bandit(pattern: '**/bandit_report.xml')])
             }
         }
